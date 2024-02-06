@@ -7,6 +7,7 @@ import time
 import numpy as np
 import pybullet as p
 import matplotlib.pyplot as plt
+import pandas as pd
 
 from scipy.spatial.transform import Rotation
 from enum import Enum
@@ -438,9 +439,25 @@ def thrusts(controller,
                                             )
     return kf * rpms**2
 
-def plot_errors():
-    print("Hello world from project utils!!!!")
-    pass
+def plot_errors(df):
+    labels = ['x', 'y', 'z', 'yaw']
+    for i in range(len(labels)):
+        plt.figure(figsize=(16,9))
+        plt.plot(df.index, df[f"{labels[i]}d"], label=f"{labels[i]}_desired", color='red') 
+        plt.plot(df.index, df[f"{labels[i]}"], label=f"{labels[i]}_actual", color='blue') 
+        plt.xlabel('Timesteps')
+        plt.ylabel('Position [m]')
+        plt.legend()
+        plt.title(f"Desired vs Actual Position ({labels[i]})")
+        plt.savefig(f"plots/{labels[i]}_trajectory.png")
+        plt.show()
 
-def plot_desired():
-    pass
+    for i in range(len(labels)):
+        plt.figure(figsize=(16,9))
+        plt.plot(df.index, df[f"{labels[i]}_err"], label=f"{labels[i]}_error", color='blue') 
+        plt.xlabel('Timesteps')
+        plt.ylabel('Error')
+        plt.legend()
+        plt.title(f"Position Errors ({labels[i]})")
+        plt.savefig(f"plots/{labels[i]}_error.png")
+        plt.show()

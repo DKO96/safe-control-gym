@@ -160,7 +160,7 @@ class Controller():
               target_vel (ndarray): (3,1)-shaped array of floats containing the desired velocity.
               target_acc (ndarray): (3,1)-shaped array of floats containing the desired acceleration.
         """
-        rpms, _, _ = self.ctrl.compute_control( self.CTRL_TIMESTEP,
+        rpms, pos_e, yaw_e = self.ctrl.compute_control( self.CTRL_TIMESTEP,
                                                 cur_pos=np.array([obs[0],obs[2],obs[4]]),
                                                 cur_quat=np.array(p.getQuaternionFromEuler([obs[6],obs[7],obs[8]])),
                                                 cur_vel=np.array([obs[1],obs[3],obs[5]]),
@@ -169,8 +169,7 @@ class Controller():
                                                 target_vel=target_v,
                                                 target_acc=target_a
                                                 )
-        print(f"how many times is this called?")
-        return self.KF * rpms**2
+        return self.KF * rpms**2, pos_e, yaw_e
 
     def getRef(self,
               time,

@@ -11,6 +11,7 @@ import time
 import inspect
 import numpy as np
 import pybullet as p
+import pandas as pd
 
 from functools import partial
 from rich.tree import Tree
@@ -21,11 +22,11 @@ from safe_control_gym.utils.registration import make
 from safe_control_gym.utils.utils import sync
 
 try:
-    from project_utils import Command, thrusts, plot_errors, plot_desired
+    from project_utils import Command, thrusts, plot_errors
     from planner import Controller
 except ImportError:
     # Test import.
-    from .project_utils import Command, thrusts, plot_errors, plot_desired
+    from .project_utils import Command, thrusts, plot_errors
     from .planner import Controller
 
 try:
@@ -75,7 +76,8 @@ def run(test=False):
     circle_radius = obs[0] # m
 
     ctrl = Controller(circle_radius, vicon_obs, info, verbose=config.verbose)
-    plot_errors()
+    errors = []
+    # df = pd.DataFrame(column=['xd', 'yd', 'zd', 'yawd', 'x', 'y', 'z', 'yaw', 'x_err', 'y_err', 'z_err', 'yaw_err']) 
     
     # Create counters
     episodes_count = 1
@@ -146,7 +148,7 @@ def run(test=False):
         # Get reference pos, vel, acc from the circle trajectory
         target_pos, target_vel, target_acc = ctrl.getRef(curr_time, obs, reward, done, info)
         # TODO: implement the geometric controller in the computeAction function
-        action = ctrl.computeAction(obs, target_pos, target_vel, target_acc)
+        action, pos_e, yaw_e = ctrl.computeAction(obs, target_pos, target_vel, target_acc)
         # Get new observation after taking the computed actions
         obs, reward, done, info = env.step(action)
 
@@ -177,6 +179,22 @@ def run(test=False):
             print('\tCollision: ' + str(info["collision"]))
             print('\tTotal collisions: ' + str(collisions_count))
             print('\tCollided objects (history): ' + str(collided_objects))      
+
+        data = {
+            'xd': target_pos[0],
+            'yd': target_pos[1],
+            'zd': target_pos[2],
+            'yawd': yaw_e + obs[8],
+            'x': obs[0],
+            'y': obs[2],
+            'z': obs[4],
+            'yaw': obs[8],
+            'x_err': pos_e[0],
+            'y_err': pos_e[1],
+            'z_err': pos_e[2],
+            'yaw_err': yaw_e,
+        }
+        errors.append(data)
 
         # Synchronize the GUI.
         if config.quadrotor_config.gui:
@@ -213,8 +231,10 @@ def run(test=False):
                 ]
             stats.append(episode_stats)
             # break the loop when the trajectory is complete
+            df = pd.DataFrame(errors)
+            plot_errors(df)
             break 
-
+        
     # Close the environment and print timing statistics.
     env.close()
     elapsed_sec = time.time() - START

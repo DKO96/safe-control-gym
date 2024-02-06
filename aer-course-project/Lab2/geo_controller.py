@@ -109,7 +109,8 @@ class GeoController():
                                  target_rpy_rates
                                  )
         cur_rpy = p.getEulerFromQuaternion(cur_quat)
-        return rpm, pos_e, desire_rpy[2] - cur_rpy[2]
+        yaw_e = desire_rpy[2] - cur_rpy[2]
+        return rpm, pos_e, yaw_e
 
     def _compute_desired_force_and_euler(self,
                                  control_timestep,
