@@ -43,12 +43,6 @@ except ImportError:
     from .project_utils import PIDController
 
 
-
-# try:
-#     from geo_controller_matt import GeoController
-# except ImportError:
-#     from .geo_controller_matt import GeoController
-
 class Controller():
     """Template controller class.
 
@@ -155,27 +149,28 @@ class Controller():
                           physicsClientId=initial_info["pyb_client"])
 
     def computeAction(self, obs,target_p,target_v,target_a):
-      """Compute the rotor speed using the geometric controller
-        Args:
-            control_timestep (float): The time step at which control is computed.
-            cur_pos (ndarray): (3,1)-shaped array of floats containing the current position.
-            cur_quat (ndarray): (4,1)-shaped array of floats containing the current orientation as a quaternion.
-            cur_vel (ndarray): (3,1)-shaped array of floats containing the current velocity.
-            cur_ang_vel (ndarray): (3,1)-shaped array of floats containing the current angular velocity.
-            target_pos (ndarray): (3,1)-shaped array of floats containing the desired position.
-            target_vel (ndarray): (3,1)-shaped array of floats containing the desired velocity.
-            target_acc (ndarray): (3,1)-shaped array of floats containing the desired acceleration.
-      """
-      rpms, _, _ = self.ctrl.compute_control( self.CTRL_TIMESTEP,
-                                              cur_pos=np.array([obs[0],obs[2],obs[4]]),
-                                              cur_quat=np.array(p.getQuaternionFromEuler([obs[6],obs[7],obs[8]])),
-                                              cur_vel=np.array([obs[1],obs[3],obs[5]]),
-                                              cur_ang_vel=np.array([obs[9],obs[10],obs[11]]),
-                                              target_pos=target_p,
-                                              target_vel=target_v,
-                                              target_acc=target_a
-                                              )
-      return self.KF * rpms**2
+        """Compute the rotor speed using the geometric controller
+          Args:
+              control_timestep (float): The time step at which control is computed.
+              cur_pos (ndarray): (3,1)-shaped array of floats containing the current position.
+              cur_quat (ndarray): (4,1)-shaped array of floats containing the current orientation as a quaternion.
+              cur_vel (ndarray): (3,1)-shaped array of floats containing the current velocity.
+              cur_ang_vel (ndarray): (3,1)-shaped array of floats containing the current angular velocity.
+              target_pos (ndarray): (3,1)-shaped array of floats containing the desired position.
+              target_vel (ndarray): (3,1)-shaped array of floats containing the desired velocity.
+              target_acc (ndarray): (3,1)-shaped array of floats containing the desired acceleration.
+        """
+        rpms, _, _ = self.ctrl.compute_control( self.CTRL_TIMESTEP,
+                                                cur_pos=np.array([obs[0],obs[2],obs[4]]),
+                                                cur_quat=np.array(p.getQuaternionFromEuler([obs[6],obs[7],obs[8]])),
+                                                cur_vel=np.array([obs[1],obs[3],obs[5]]),
+                                                cur_ang_vel=np.array([obs[9],obs[10],obs[11]]),
+                                                target_pos=target_p,
+                                                target_vel=target_v,
+                                                target_acc=target_a
+                                                )
+        print(f"how many times is this called?")
+        return self.KF * rpms**2
 
     def getRef(self,
               time,
